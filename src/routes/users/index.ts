@@ -62,6 +62,15 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           await fastify.db.users.change(user.id, {"subscribedToUserIds": updatedArrOfId});
         });
 
+        const profile = await fastify.db.profiles.findOne({key: 'userId', equals: request.params.id});
+        const post = await fastify.db.posts.findOne({key: 'userId', equals: request.params.id});
+
+        if (profile !== null) {
+          await fastify.db.profiles.delete(profile.id);
+        }
+        if (post !== null) {
+          await fastify.db.posts.delete(post.id);
+        } 
         return await fastify.db.users.delete(request.params.id);
       } else {
         return fastify.httpErrors.badRequest();

@@ -35,8 +35,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createProfileBodySchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {
-      return await fastify.db.profiles.create(request.body);
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      const member = await fastify.db.memberTypes.findOne({key: 'id', equals: request.body.memberTypeId});
+      const profile = await fastify.db.profiles.findOne({key: 'userId', equals: request.body.userId});
+      if (member !== null && profile === null) {
+        return await fastify.db.profiles.create(request.body);
+      }
+      return fastify.httpErrors.badRequest();
     }
   );
 
@@ -47,8 +52,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {
-      return await fastify.db.profiles.delete(request.params.id);
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      const profile = await fastify.db.profiles.findOne({key: 'id', equals: request.params.id});
+      if (profile !== null) {
+        return await fastify.db.profiles.delete(request.params.id);
+      }
+      return fastify.httpErrors.badRequest();
     }
   );
 
@@ -60,8 +69,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {
-      return await fastify.db.profiles.change(request.params.id, request.body);
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      const profile = await fastify.db.profiles.findOne({key: 'id', equals: request.params.id});
+      if (profile !== null) {
+        return await fastify.db.profiles.change(request.params.id, request.body);
+      }
+      return fastify.httpErrors.badRequest();
     }
   );
 };

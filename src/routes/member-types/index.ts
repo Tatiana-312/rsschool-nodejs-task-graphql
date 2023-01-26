@@ -36,8 +36,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<MemberTypeEntity> {
-      return await fastify.db.memberTypes.change(request.params.id, request.body);
+    async function (request, reply): Promise<MemberTypeEntity | HttpError> {
+      const member = await fastify.db.memberTypes.findOne({key: 'id', equals: request.params.id});
+      if (member !== null) {
+        return await fastify.db.memberTypes.change(request.params.id, request.body);
+      }
+      return fastify.httpErrors.badRequest();
     }
   );
 };

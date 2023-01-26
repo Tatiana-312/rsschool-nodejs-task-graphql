@@ -2,11 +2,11 @@ import { test } from 'tap';
 import { build } from '../helper';
 import {
   createUser,
-  // createPost,
-  // createProfile,
+  createPost,
+  createProfile,
   getUser,
-  // getProfile,
-  // getPost,
+  getProfile,
+  getPost,
 } from '../utils/requests';
 
 test('users', async (t) => {
@@ -177,8 +177,8 @@ test('users', async (t) => {
     async (t) => {
       const { body: user1 } = await createUser(app);
       const { body: user2 } = await createUser(app);
-      // const { body: post1 } = await createPost(app, user1.id);
-      // const { body: profile1 } = await createProfile(app, user1.id, 'basic');
+      const { body: post1 } = await createPost(app, user1.id);
+      const { body: profile1 } = await createProfile(app, user1.id, 'basic');
 
       await app.inject({
         url: `/users/${user1.id}/subscribeTo`,
@@ -199,11 +199,11 @@ test('users', async (t) => {
       const { body: receivedUser2 } = await getUser(app, user2.id);
       t.ok(!receivedUser2.subscribedToUserIds.includes(user1.id));
 
-      // const { res: resReceivedProfile1 } = await getProfile(app, profile1.id);
-      // t.ok(resReceivedProfile1.statusCode === 404);
+      const { res: resReceivedProfile1 } = await getProfile(app, profile1.id);
+      t.ok(resReceivedProfile1.statusCode === 404);
 
-      // const { res: resReceivedPost1 } = await getPost(app, post1.id);
-      // t.ok(resReceivedPost1.statusCode === 404);
+      const { res: resReceivedPost1 } = await getPost(app, post1.id);
+      t.ok(resReceivedPost1.statusCode === 404);
     }
   );
 });
