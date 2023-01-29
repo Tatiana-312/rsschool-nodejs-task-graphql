@@ -7,12 +7,13 @@ import {
 } from './schemas';
 import type { UserEntity } from '../../utils/DB/entities/DBUsers';
 import { HttpError } from '@fastify/sensible/lib/httpError';
+import { create, deleteUser, getAll, getById, patch, subscribeToUser, unsubscribeFromUser } from '../../utils/controller';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<UserEntity[]> {
-    return await fastify.db.users.findMany();
+    return await getAll(fastify.db.users);
   });
 
   fastify.get(
@@ -23,12 +24,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity | HttpError> {
-      const result = await fastify.db.users.findOne({key: 'id', equals: request.params.id});
-      if (result !== null) {
-        return result;
-      } else {
-        return fastify.httpErrors.notFound();
-      }
+      return await getById(fastify, fastify.db.users, request.params.id);
     }
   );
 
@@ -40,7 +36,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      return await fastify.db.users.create(request.body);
+      return await create(fastify, fastify.db.users, request);
     }
   );
 
@@ -52,29 +48,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity | HttpError> {
-      const user = await fastify.db.users.findOne({key: 'id', equals: request.params.id});
-      if (user !== null) {
-        const arrOfUsers = await fastify.db.users.findMany({key: 'subscribedToUserIds', inArray: request.params.id});
-
-        arrOfUsers.forEach(async (user) => {
-          const arrOfId = user.subscribedToUserIds;
-          const updatedArrOfId = arrOfId.filter((id) => id !== request.params.id);
-          await fastify.db.users.change(user.id, {"subscribedToUserIds": updatedArrOfId});
-        });
-
-        const profile = await fastify.db.profiles.findOne({key: 'userId', equals: request.params.id});
-        const post = await fastify.db.posts.findOne({key: 'userId', equals: request.params.id});
-
-        if (profile !== null) {
-          await fastify.db.profiles.delete(profile.id);
-        }
-        if (post !== null) {
-          await fastify.db.posts.delete(post.id);
-        } 
-        return await fastify.db.users.delete(request.params.id);
-      } else {
-        return fastify.httpErrors.badRequest();
-      }
+      return await deleteUser(fastify, request);
     }
   );
 
@@ -87,15 +61,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity | HttpError> {
-      const user = await fastify.db.users.findOne({key: 'id', equals: request.body.userId});
-      if (user !== null) {
-        const arrOfId = user.subscribedToUserIds;
-        arrOfId.push(request.params.id);
-        const result = await fastify.db.users.change(request.body.userId, {"subscribedToUserIds": arrOfId});
-        return result;
-      } else {
-        return fastify.httpErrors.badRequest();
-      }
+      return await subscribeToUser(fastify, request);
     }
   );
 
@@ -108,16 +74,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity | HttpError> {
-      const user = await fastify.db.users.findOne({key: 'id', equals: request.body.userId});
-      if (user !== null) {
-        const arrOfId = user.subscribedToUserIds;
-        if (arrOfId.includes(request.params.id)) {
-          const updatedArrOfId = arrOfId.filter((id) => id !== request.params.id);
-          const result = await fastify.db.users.change(request.body.userId, {"subscribedToUserIds": updatedArrOfId});
-          return result;
-        }
-      }
-      return fastify.httpErrors.badRequest();
+      return await unsubscribeFromUser(fastify, request);
     }
   );
 
@@ -130,12 +87,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity | HttpError> {
-      const user = await fastify.db.users.findOne({key: 'id', equals: request.params.id});
-      if (user !== null) {
-        return await fastify.db.users.change(request.params.id, request.body);
-      } else {
-        return fastify.httpErrors.badRequest();
-      }
+      return await patch(fastify, fastify.db.users, request);
     }
   );
 };

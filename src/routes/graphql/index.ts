@@ -3,6 +3,7 @@ import { graphqlBodySchema } from './schema';
 import { graphql } from 'graphql';
 import { GraphQLID, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql/type';
 import { MemberType, Post, Profile, User } from '../../utils/graphql/graphqlTypes';
+import { getAll, getById } from '../../utils/controller';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -20,49 +21,47 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         fields: {
           users: {
             type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
-            resolve: async () => {
-              return await fastify.db.users.findMany()
-            }
+            resolve: async () => await getAll(fastify.db.users)
           },
           user: {
             type: User,
             args: {
               id: { type: new GraphQLNonNull(GraphQLID) }
             },
-            resolve: async (_, args) => await fastify.db.users.findOne({ key: 'id', equals: args.id })
+            resolve: async (_, args) => await getById(fastify, fastify.db.users, args.id)
           },
           profiles: {
             type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Profile))),
-            resolve: async () => await fastify.db.profiles.findMany()
+            resolve: async () => await getAll(fastify.db.profiles)
           },
           profile: {
             type: Profile,
             args: {
               id: { type: new GraphQLNonNull(GraphQLID) }
             },
-            resolve: async (_, args) => await fastify.db.profiles.findOne({ key: 'id', equals: args.id })
+            resolve: async (_, args) => await getById(fastify, fastify.db.profiles, args.id)
           },
           posts: {
             type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
-            resolve: async () => await fastify.db.posts.findMany()
+            resolve: async () => await getAll(fastify.db.posts)
           },
           post: {
             type: Post,
             args: {
               id: { type: new GraphQLNonNull(GraphQLID) }
             },
-            resolve: async (_, args) => await fastify.db.posts.findOne({ key: 'id', equals: args.id })
+            resolve: async (_, args) => await getById(fastify, fastify.db.posts, args.id)
           },
           memberTypes: {
             type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(MemberType))),
-            resolve: async () => await fastify.db.memberTypes.findMany()
+            resolve: async () => await getAll(fastify.db.memberTypes)
           },
           memberType: {
             type: MemberType,
             args: {
               id: { type: new GraphQLNonNull(GraphQLID) }
             },
-            resolve: async (_, args) => await fastify.db.memberTypes.findOne({ key: 'id', equals: args.id })
+            resolve: async (_, args) => await getById(fastify, fastify.db.memberTypes, args.id)
           },
         }
       });
