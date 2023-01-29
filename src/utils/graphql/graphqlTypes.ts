@@ -1,9 +1,9 @@
-import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLInt } from "graphql/type";
+import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLID } from "graphql/type";
 
 export const User = new GraphQLObjectType({
   name: 'UserType',
   fields: () => ({
-    id: {type: GraphQLString},
+    id: {type: new GraphQLNonNull(GraphQLID)},
     firstName: {type: GraphQLString},
     lastName: {type: GraphQLString},
     email: {type: GraphQLString},
@@ -14,7 +14,7 @@ export const User = new GraphQLObjectType({
 export const Profile = new GraphQLObjectType({
   name: 'ProfileType',
   fields: () => ({
-    id: {type: GraphQLString},
+    id: {type: GraphQLID},
     avatar: {type: GraphQLString},
     sex: {type: GraphQLString},
     birthday: {type: GraphQLInt},
@@ -29,7 +29,7 @@ export const Profile = new GraphQLObjectType({
 export const Post = new GraphQLObjectType({
   name: 'PostType',
   fields: () => ({
-    id: {type: GraphQLString},
+    id: {type: GraphQLID},
     title: {type: GraphQLString},
     content: {type: GraphQLString},
     userId: {type: GraphQLString}
@@ -39,7 +39,7 @@ export const Post = new GraphQLObjectType({
 export const MemberType = new GraphQLObjectType({
   name: 'MemberTypeType',
   fields: () => ({
-    id: {type: GraphQLString},
+    id: {type: GraphQLID},
     discount: {type: GraphQLInt},
     monthPostsLimit: {type: GraphQLInt}
   })
