@@ -11,21 +11,6 @@ export const User = new GraphQLObjectType({
   })
 });
 
-export const Profile = new GraphQLObjectType({
-  name: 'ProfileType',
-  fields: () => ({
-    id: {type: GraphQLID},
-    avatar: {type: GraphQLString},
-    sex: {type: GraphQLString},
-    birthday: {type: GraphQLInt},
-    country: {type: GraphQLString},
-    street: {type: GraphQLString},
-    city: {type: GraphQLString},
-    memberTypeId: {type: GraphQLString},
-    userId: {type: GraphQLString}
-  })
-});
-
 export const Post = new GraphQLObjectType({
   name: 'PostType',
   fields: () => ({
@@ -42,5 +27,34 @@ export const MemberType = new GraphQLObjectType({
     id: {type: GraphQLID},
     discount: {type: GraphQLInt},
     monthPostsLimit: {type: GraphQLInt}
+  })
+});
+
+export const Profile = new GraphQLObjectType({
+  name: 'ProfileType',
+  fields: () => ({
+    id: {type: GraphQLID},
+    avatar: {type: GraphQLString},
+    sex: {type: GraphQLString},
+    birthday: {type: GraphQLInt},
+    country: {type: GraphQLString},
+    street: {type: GraphQLString},
+    city: {type: GraphQLString},
+    memberTypeId: {type: GraphQLString},
+    userId: {type: GraphQLString},
+    memberType: {type: MemberType}
+  })
+});
+
+export const UserWithRelatives = new GraphQLObjectType({
+  name: 'UserWithRelativesType',
+  fields: () => ({
+    id: {type: new GraphQLNonNull(GraphQLID)},
+    firstName: {type: GraphQLString},
+    lastName: {type: GraphQLString},
+    email: {type: GraphQLString},
+    subscribedToUserIds: {type: new GraphQLNonNull(new GraphQLList(GraphQLString))},
+    profile: {type: Profile},
+    post: {type: Post}
   })
 });

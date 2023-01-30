@@ -1,13 +1,29 @@
 import { GraphQLID, GraphQLList, GraphQLNonNull, GraphQLObjectType } from "graphql/type";
 import { getAll, getById } from "../controller";
-import { User, Profile, Post, MemberType } from "./graphqlTypes";
+import { UserEntity } from "../DB/entities/DBUsers";
+import { User, Profile, Post, MemberType, UserWithRelatives } from "./graphqlTypes";
 
 export const queryType = new GraphQLObjectType({
   name: "Query",
   fields: {
     users: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
-      resolve: async (source, args, fastify) => await getAll(fastify.db.users),
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserWithRelatives))),
+      resolve: async (source, args, fastify) => {
+       return await (await fastify.db.users.findMany()).map(async (user: UserEntity) => {
+          const profile = await fastify.db.profiles.findOne({key: 'userId', equals: user.id});
+          const post = await fastify.db.posts.findOne({key: 'userId', equals: user.id});
+          const member = await fastify.db.memberTypes.findOne({key: 'id', equals: profile?.memberTypeId});
+    
+          return {
+            ...user,
+            profile: {
+              ...profile,
+              memberType: member 
+            },
+            post: post
+          }
+        });
+      }
     },
     user: {
       type: User,
