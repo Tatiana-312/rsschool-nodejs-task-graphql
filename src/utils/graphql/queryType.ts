@@ -11,7 +11,7 @@ export const queryType = new GraphQLObjectType({
       resolve: async (source, args, fastify) => {
        return await (await fastify.db.users.findMany()).map(async (user: UserEntity) => {
           const profile = await fastify.db.profiles.findOne({key: 'userId', equals: user.id});
-          const post = await fastify.db.posts.findOne({key: 'userId', equals: user.id});
+          const posts = await fastify.db.posts.findMany({key: 'userId', equals: user.id});
           const member = await fastify.db.memberTypes.findOne({key: 'id', equals: profile?.memberTypeId});
     
           return {
@@ -20,7 +20,7 @@ export const queryType = new GraphQLObjectType({
               ...profile,
               memberType: member 
             },
-            post: post
+            posts: posts
           }
         });
       }
@@ -38,7 +38,7 @@ export const queryType = new GraphQLObjectType({
         }
 
         const profile = await fastify.db.profiles.findOne({ key: 'userId', equals: user.id });
-        const post = await fastify.db.posts.findOne({ key: 'userId', equals: user.id });
+        const posts = await fastify.db.posts.findMany({ key: 'userId', equals: user.id });
         const member = await fastify.db.memberTypes.findOne({ key: 'id', equals: profile?.memberTypeId });
 
           return {
@@ -47,7 +47,7 @@ export const queryType = new GraphQLObjectType({
               ...profile,
               memberType: member
             },
-            post: post
+            posts: posts
           }
       }
     },
