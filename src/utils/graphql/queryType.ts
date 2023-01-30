@@ -14,10 +14,41 @@ export const queryType = new GraphQLObjectType({
           const posts = await fastify.db.posts.findMany({key: 'userId', equals: user.id});
           const member = await fastify.db.memberTypes.findOne({key: 'id', equals: profile?.memberTypeId});
           const subscriptions = await fastify.db.users.findMany({key: 'subscribedToUserIds', inArray: user.id});
+
+          const subscribers = await Promise.all(user.subscribedToUserIds.map(async (subscriberId: string) => {
+            return await fastify.db.users.findOne({key: 'id', equals: subscriberId});
+          }));
+
+          const nestedSubscriptions = subscriptions.map(async (subscription: UserEntity) => {
+            const subscriptionsInSubscription = await fastify.db.users.findMany({key: 'subscribedToUserIds', inArray: subscription.id});
+            const subscribersInSubscriber = await Promise.all(subscription.subscribedToUserIds.map(async (subscriberId: string) => {
+              return await fastify.db.users.findOne({key: 'id', equals: subscriberId});
+            }));
+
+            return {
+              ...subscription,
+              userSubscribedTo: subscriptionsInSubscription,
+              subscribedToUser: subscribersInSubscriber
+            }
+          });
+
+          const nestedSubscribers = subscribers.map(async (subscriber: UserEntity) => {
+            const subscriptionsInSubscription = await fastify.db.users.findMany({key: 'subscribedToUserIds', inArray: subscriber.id});
+            const subscribersInSubscriber = await Promise.all(subscriber.subscribedToUserIds.map(async (subscriberId: string) => {
+              return await fastify.db.users.findOne({key: 'id', equals: subscriberId});
+            }));
+
+            return {
+              ...subscriber,
+              userSubscribedTo: subscriptionsInSubscription,
+              subscribedToUser: subscribersInSubscriber
+            }
+          });
     
           return {
             ...user,
-            userSubscribedTo: subscriptions,
+            userSubscribedTo: nestedSubscriptions,
+            subscribedToUser: nestedSubscribers,
             profile: {
               ...profile,
               memberType: member 

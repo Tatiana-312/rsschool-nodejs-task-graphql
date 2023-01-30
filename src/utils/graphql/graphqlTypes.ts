@@ -46,8 +46,8 @@ export const Profile = new GraphQLObjectType({
   })
 });
 
-export const UserWithRelatives = new GraphQLObjectType({
-  name: 'UserWithRelativesType',
+export const NestedUser = new GraphQLObjectType({
+  name: 'NestedUserType',
   fields: () => ({
     id: {type: new GraphQLNonNull(GraphQLID)},
     firstName: {type: GraphQLString},
@@ -56,6 +56,21 @@ export const UserWithRelatives = new GraphQLObjectType({
     subscribedToUserIds: {type: new GraphQLNonNull(new GraphQLList(GraphQLString))},
     userSubscribedTo: { type: new GraphQLList(User)},
     subscribedToUser: { type: new GraphQLList(User)},
+    profile: {type: Profile},
+    posts: {type: new GraphQLList(Post)}
+  })
+});
+
+export const UserWithRelatives = new GraphQLObjectType({
+  name: 'UserWithRelativesType',
+  fields: () => ({
+    id: {type: new GraphQLNonNull(GraphQLID)},
+    firstName: {type: GraphQLString},
+    lastName: {type: GraphQLString},
+    email: {type: GraphQLString},
+    subscribedToUserIds: {type: new GraphQLNonNull(new GraphQLList(GraphQLString))},
+    userSubscribedTo: { type: new GraphQLList(NestedUser)},
+    subscribedToUser: { type: new GraphQLList(NestedUser)},
     profile: {type: Profile},
     posts: {type: new GraphQLList(Post)}
   })
