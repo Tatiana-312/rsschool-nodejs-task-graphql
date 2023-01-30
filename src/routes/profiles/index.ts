@@ -2,13 +2,15 @@ import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-sc
 import { idParamSchema } from '../../utils/reusedSchemas';
 import { createProfileBodySchema, changeProfileBodySchema } from './schema';
 import type { ProfileEntity } from '../../utils/DB/entities/DBProfiles';
+import { HttpError } from '@fastify/sensible/lib/httpError';
+import { createProfiles, deleteEnt, getAll, getById, patch } from '../../utils/controller';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
-  fastify.get('/', async function (request, reply): Promise<
-    ProfileEntity[]
-  > {});
+  fastify.get('/', async function (request, reply): Promise<ProfileEntity[]> {
+    return await getAll(fastify.db.profiles);
+  });
 
   fastify.get(
     '/:id',
@@ -17,7 +19,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      return await getById(fastify, fastify.db.profiles, request.params.id);
+    }
   );
 
   fastify.post(
@@ -27,7 +31,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createProfileBodySchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      return await createProfiles(fastify, request);
+    }
   );
 
   fastify.delete(
@@ -37,7 +43,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      return await deleteEnt(fastify, fastify.db.profiles, request);
+    }
   );
 
   fastify.patch(
@@ -48,7 +56,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity | HttpError> {
+      return await patch(fastify, fastify.db.profiles, request);
+    }
   );
 };
 

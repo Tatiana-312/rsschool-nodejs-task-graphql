@@ -2,11 +2,15 @@ import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-sc
 import { idParamSchema } from '../../utils/reusedSchemas';
 import { createPostBodySchema, changePostBodySchema } from './schema';
 import type { PostEntity } from '../../utils/DB/entities/DBPosts';
+import { HttpError } from '@fastify/sensible/lib/httpError';
+import { getAll, getById, create, deleteEnt, patch } from '../../utils/controller';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
-  fastify.get('/', async function (request, reply): Promise<PostEntity[]> {});
+  fastify.get('/', async function (request, reply): Promise<PostEntity[]> {
+    return await getAll(fastify.db.posts);
+  });
 
   fastify.get(
     '/:id',
@@ -15,7 +19,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity | HttpError> {
+      return await getById(fastify, fastify.db.posts, request.params.id);
+    }
   );
 
   fastify.post(
@@ -25,7 +31,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createPostBodySchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity> {
+      return await create(fastify, fastify.db.posts, request);
+    }
   );
 
   fastify.delete(
@@ -35,7 +43,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity | HttpError> {
+      return await deleteEnt(fastify, fastify.db.posts, request);
+    }
   );
 
   fastify.patch(
@@ -46,7 +56,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {}
+    async function (request, reply): Promise<PostEntity | HttpError> {
+      return await patch(fastify, fastify.db.posts, request);
+    }
   );
 };
 
