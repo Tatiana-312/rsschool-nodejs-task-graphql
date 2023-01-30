@@ -13,9 +13,11 @@ export const queryType = new GraphQLObjectType({
           const profile = await fastify.db.profiles.findOne({key: 'userId', equals: user.id});
           const posts = await fastify.db.posts.findMany({key: 'userId', equals: user.id});
           const member = await fastify.db.memberTypes.findOne({key: 'id', equals: profile?.memberTypeId});
+          const subscriptions = await fastify.db.users.findMany({key: 'subscribedToUserIds', inArray: user.id});
     
           return {
             ...user,
+            userSubscribedTo: subscriptions,
             profile: {
               ...profile,
               memberType: member 

@@ -54,6 +54,7 @@ export const UserWithRelatives = new GraphQLObjectType({
     lastName: {type: GraphQLString},
     email: {type: GraphQLString},
     subscribedToUserIds: {type: new GraphQLNonNull(new GraphQLList(GraphQLString))},
+    userSubscribedTo: { type: new GraphQLList(User)},
     profile: {type: Profile},
     posts: {type: new GraphQLList(Post)}
   })
