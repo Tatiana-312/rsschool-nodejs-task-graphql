@@ -33,7 +33,7 @@ export const queryType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(GraphQLID) },
       },
       resolve: async (source, args, fastify) => {
-        const user = await fastify.db.users.findOne({key: 'id', equals: args.id});
+        const user = await fastify.db.users.findOne({ key: 'id', equals: args.id });
 
         if (user === null) {
           return fastify.httpErrors.notFound('User not found!');
@@ -42,15 +42,19 @@ export const queryType = new GraphQLObjectType({
         const profile = await fastify.db.profiles.findOne({ key: 'userId', equals: user.id });
         const posts = await fastify.db.posts.findMany({ key: 'userId', equals: user.id });
         const member = await fastify.db.memberTypes.findOne({ key: 'id', equals: profile?.memberTypeId });
+        const subscribers = (await user.subscribedToUserIds).map(async (subscriberId: string) => {
+          return await fastify.db.users.findOne({key: 'id', equals: subscriberId});
+        });
 
-          return {
-            ...user,
-            profile: {
-              ...profile,
-              memberType: member
-            },
-            posts: posts
-          }
+        return {
+          ...user,
+          subscribedToUser: subscribers,
+          profile: {
+            ...profile,
+            memberType: member
+          },
+          posts: posts
+        }
       }
     },
     profiles: {
