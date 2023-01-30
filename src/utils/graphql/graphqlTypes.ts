@@ -1,4 +1,4 @@
-import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLID } from "graphql/type";
+import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLID, GraphQLInputObjectType } from "graphql/type";
 
 export const User = new GraphQLObjectType({
   name: 'UserType',
@@ -45,6 +45,20 @@ export const Profile = new GraphQLObjectType({
     memberType: {type: MemberType}
   })
 });
+export const ProfileType = new GraphQLObjectType({
+  name: 'Profile',
+  fields: () => ({
+    id: {type: GraphQLID},
+    avatar: {type: GraphQLString},
+    sex: {type: GraphQLString},
+    birthday: {type: GraphQLInt},
+    country: {type: GraphQLString},
+    street: {type: GraphQLString},
+    city: {type: GraphQLString},
+    memberTypeId: {type: GraphQLString},
+    userId: {type: GraphQLString}
+  })
+});
 
 export const NestedUser = new GraphQLObjectType({
   name: 'NestedUserType',
@@ -73,5 +87,38 @@ export const UserWithRelatives = new GraphQLObjectType({
     subscribedToUser: { type: new GraphQLList(NestedUser)},
     profile: {type: Profile},
     posts: {type: new GraphQLList(Post)}
+  })
+});
+
+export const UserInput = new GraphQLInputObjectType({
+  name: 'UserInputType',
+  fields: () => ({
+    firstName: {type: GraphQLString},
+    lastName: {type: GraphQLString},
+    email: {type: GraphQLString},
+    subscribedToUserIds: {type: new GraphQLNonNull(new GraphQLList(GraphQLString))}
+  })
+});
+
+export const ProfileInput = new GraphQLInputObjectType({
+  name: 'ProfileInputType',
+  fields: () => ({
+    avatar: {type: GraphQLString},
+    sex: {type: GraphQLString},
+    birthday: {type: GraphQLInt},
+    country: {type: GraphQLString},
+    street: {type: GraphQLString},
+    city: {type: GraphQLString},
+    memberTypeId: {type: GraphQLString},
+    userId: {type: GraphQLString}
+  })
+});
+
+export const PostInput = new GraphQLInputObjectType({
+  name: 'PostInputType',
+  fields: () => ({
+    title: {type: GraphQLString},
+    content: {type: GraphQLString},
+    userId: {type: GraphQLString}
   })
 });
